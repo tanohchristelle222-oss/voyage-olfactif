@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-navy: #0b1215;
+  --color-cream: #faf9f6;
+  --color-gold: #c28921;
+  --font-sans: var(--font-jost);
+  --font-display: var(--font-jost);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-jost), system-ui, sans-serif;
+}
+
+.milestone:focus-visible {
+  outline: none;
+}
+.milestone:focus-visible .ring {
+  stroke: #c28921;
+  stroke-width: 4;
+}
