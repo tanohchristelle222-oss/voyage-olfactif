@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import IntroCinematic from "@/components/IntroCinematic";
 import JourneyMap from "@/components/JourneyMap";
 import NotaGreeting from "@/components/Nota";
 import type { Metadata } from "next";
@@ -29,6 +30,9 @@ export default function Voyage() {
           }
         />
       </section>
+
+      {/* Cinématique de présentation par Nota (première visite, ou « Revoir l'introduction ») */}
+      <IntroCinematic />
     </main>
   );
 }

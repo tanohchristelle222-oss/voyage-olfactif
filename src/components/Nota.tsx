@@ -133,7 +133,16 @@ function ThoughtCloud({ width, height }: { width: number; height: number }) {
  * Quand elle réfléchit : main sous le menton, regard vers le haut et nuage « ? ».
  * `size` règle la largeur de référence ; la hauteur suit les proportions du flacon.
  */
-export function Nota({ size = 64, thinking = false }: { size?: number; thinking?: boolean }) {
+export function Nota({
+  size = 64,
+  thinking = false,
+  talking = false,
+}: {
+  size?: number;
+  thinking?: boolean;
+  /** Elle parle (introduction) : petits rebonds et main qui accompagne les paroles. */
+  talking?: boolean;
+}) {
   const height = Math.round(size * 1.45);
   const width = Math.round(height * NOTA_RATIO);
   return (
@@ -152,9 +161,12 @@ export function Nota({ size = 64, thinking = false }: { size?: number; thinking?
           thinking
             ? // réflexion : la tête penche vers le nuage, presque immobile
               { y: [0, -2, 0], rotate: [-5, -7, -5], scaleY: 1 }
-            : { y: [0, -6, 0], rotate: [-2, 2, -2], scaleY: [1, 1.02, 1] }
+            : talking
+              ? // elle parle : petits rebonds rythmés
+                { y: [0, -4, 0], rotate: [-1.5, 1.5, -1.5], scaleY: [1, 1.03, 1] }
+              : { y: [0, -6, 0], rotate: [-2, 2, -2], scaleY: [1, 1.02, 1] }
         }
-        transition={{ duration: thinking ? 2.6 : 3.2, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: thinking ? 2.6 : talking ? 0.6 : 3.2, repeat: Infinity, ease: "easeInOut" }}
       >
         <Image src="/nota-body.webp" alt="" width={width} height={height} priority draggable={false} />
 
@@ -203,13 +215,18 @@ export function Nota({ size = 64, thinking = false }: { size?: number; thinking?
               thinking
                 ? // le doigt tapote doucement le menton
                   { rotate: [0, 0, -5, 0, -5, 0, 0] }
-                : // au repos : un petit salut de temps en temps
-                  { rotate: [0, 0, -12, 2, -8, 0, 0] }
+                : talking
+                  ? // elle parle : la main accompagne ses paroles
+                    { rotate: [0, -10, 2, -6, 0] }
+                  : // au repos : un petit salut de temps en temps
+                    { rotate: [0, 0, -12, 2, -8, 0, 0] }
             }
             transition={
               thinking
                 ? { duration: 2.4, repeat: Infinity, times: [0, 0.4, 0.5, 0.6, 0.7, 0.8, 1], ease: "easeInOut" }
-                : { duration: 6, repeat: Infinity, times: [0, 0.55, 0.65, 0.72, 0.8, 0.88, 1], ease: "easeInOut" }
+                : talking
+                  ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 6, repeat: Infinity, times: [0, 0.55, 0.65, 0.72, 0.8, 0.88, 1], ease: "easeInOut" }
             }
           >
             <Image src="/nota-arm.webp" alt="" width={width} height={height} draggable={false} />
@@ -278,7 +295,7 @@ export default function NotaGreeting({ className = "" }: { className?: string })
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.8, duration: 0.6 }}
-      className={`flex items-start gap-3 ${className}`}
+      className={`nota-greeting flex items-start gap-3 ${className}`}
     >
       <Nota size={84} thinking={loading && !reply} />
       <div className="w-72 max-w-[calc(100vw-7rem)]">

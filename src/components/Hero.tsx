@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import { replayIntro } from "@/lib/intro";
 import { useJourney } from "@/lib/journey";
 
 const fade = (delay: number) => ({
@@ -42,6 +43,12 @@ export default function Hero({ className = "" }: { className?: string }) {
           <span className="transition-transform group-hover:translate-x-1">→</span>
         </Link>
         <span className="text-xs text-navy/60">≈ 5 min · Sauvegarde automatique</span>
+        <button
+          onClick={replayIntro}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#9f6e14] underline-offset-4 transition hover:underline"
+        >
+          <span aria-hidden>▶</span> Revoir l&apos;introduction
+        </button>
       </motion.div>
     </div>
   );

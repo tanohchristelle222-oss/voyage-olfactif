@@ -55,6 +55,19 @@ OLLAMA_MODEL=qwen2.5:7b
 OLLAMA_URL=http://localhost:11434
 ```
 
+## Voix de Nota (introduction)
+
+À la première visite de la roadmap, Nota présente le parcours à voix haute. La voix est enregistrée dans `public/voix/intro-*.wav`. Elle a été générée avec [Piper](https://github.com/rhasspy/piper), une synthèse vocale neuronale gratuite qui fonctionne hors ligne, avec la voix française « Jessica » (`fr_FR-upmc-medium`, locutrice `jessica`).
+
+Après une modification du texte de l'intro (`src/lib/intro.ts`), régénérez les fichiers :
+
+1. Placez Piper (`piper_windows_amd64.zip`, à extraire) et la voix ([`fr/fr_FR/upmc/medium`](https://huggingface.co/rhasspy/piper-voices/tree/main/fr/fr_FR/upmc/medium) : fichiers `.onnx` et `.onnx.json`) dans `~/.piper`, ou dans le dossier indiqué par `PIPER_DIR`.
+2. Lancez :
+
+```bash
+npm run voix
+```
+
 ## Organisation du code
 
 - `src/components/JourneyMap.tsx` : la roadmap (route, épingles, animations)

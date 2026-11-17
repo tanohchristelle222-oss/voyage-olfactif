@@ -25,7 +25,7 @@ type Step = { n: number; x: number; y: number; ring: string; label: string };
 type Status = "done" | "current" | "locked";
 
 // 5 étapes réparties le long de la route : de la boutique jusqu'à l'atelier du parfumeur.
-const POSITIONS = [
+export const POSITIONS = [
   { x: 164, y: 855, ring: "#a4b26a" }, // 1. Votre projet — près de la boutique
   { x: 665, y: 488, ring: "#a4b26a" }, // 2. Les contraintes — le verger
   { x: 942, y: 592, ring: "#9678b0" }, // 3. Famille olfactive — les champs de fleurs
@@ -362,6 +362,7 @@ export default function JourneyMap({
       {/* Calque collé au bord gauche de l'écran (et non de la carte), même échelle que la scène. */}
       {scale !== null && edgeOverlay && !preview && (
         <div
+          data-voyage-edge
           className="pointer-events-none absolute left-0 hidden origin-top-left lg:block"
           style={{ top: `calc(50% - ${450 * scale}px)`, width: 1440, height: 900, transform: `scale(${scale})` }}
         >

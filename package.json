@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "voix": "node scripts/generate-intro-voice.mjs"
   },
   "dependencies": {
     "motion": "^14.14.0",
