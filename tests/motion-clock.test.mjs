@@ -52,4 +52,15 @@ test('wind visibly bends larger pine trees without shifting their planted bases'
   rig.update(1.5);
   assert(rig.trees.some((tree, i) => Math.abs(tree.rotation.z - rotations[i]) * 80 > 3));
   assert.deepEqual(rig.trees.map(tree => tree.position.toArray()), bases);
+  assert(rig.trees.some(tree => tree.userData.branches.some(branch => Math.abs(branch.rotation.z) > .015)), 'crowns must move independently');
+});
+
+test('visible low-frame-rate animation follows elapsed time instead of running five times slower', () => {
+  const clock = createMotionClock();
+  clock.tick(0);
+  assert.equal(clock.tick(500).time, .5);
+  assert.equal(clock.tick(1000).time, 1);
+  clock.resetFrame();
+  assert.equal(clock.tick(20000).time, 1, 'returning from another tab must not jump the scene forward');
+  assert(Math.abs(clock.tick(20100).time - 1.1) < .0001);
 });

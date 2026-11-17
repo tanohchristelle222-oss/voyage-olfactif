@@ -1,23 +1,28 @@
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { createTestTubes } from './test-tubes.mjs';
-import { createRoadsideTrees } from './roadside-trees.mjs';
-import { fragranceState } from './fragrance-state.mjs';
-import { createScentGarden, createInspirationGreenhouse, createSampleCoffret } from './fragrance-world.mjs';
-import { createScentRibbon } from './scent-ribbon.mjs';
-import { createMotionClock } from './motion-clock.mjs';
-import { createVillage, updateVillage } from './scene.mjs';
-
-// Même repère que le SVG : la route et ses épingles restent indépendantes.
+import { fitDecor } from './decor-camera.mjs';
 export const DECOR_AREAS = [
   { kind: 'village', x: 0, y: 495, width: 390, height: 240 },
   { kind: 'tubes', x: 575, y: 600, width: 275, height: 305 },
-  { kind: 'flowers', x: 665, y: 235, width: 235, height: 170 },
+  { kind: 'projectVillage', x: 665, y: 235, width: 235, height: 170 },
   { kind: 'vanilla', x: 1200, y: 570, width: 240, height: 160 },
   { kind: 'forest', x: 1050, y: 735, width: 360, height: 185 },
   { kind: 'coffret', x: 1225, y: 335, width: 210, height: 145 },
   { kind: 'greenhouse', x: 855, y: 650, width: 180, height: 205 },
 ];
+
+export { fitDecor } from './decor-camera.mjs';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { createTestTubes } from './test-tubes.mjs';
+import { createRoadsideTrees } from './roadside-trees.mjs';
+import { fragranceState } from './fragrance-state.mjs';
+import { createInspirationGreenhouse, createSampleCoffret } from './fragrance-world.mjs';
+import { createScentRibbon } from './scent-ribbon.mjs';
+import { createMotionClock } from './motion-clock.mjs';
+import { createProjectVillage } from './project-village.mjs';
+import { createVillage, updateVillage } from './scene.mjs';
+
+// Même repère que le SVG : la route et ses épingles restent indépendantes.
+
 const material = (color, props = {}) => new THREE.MeshStandardMaterial({ color, roughness: .56, ...props });
 function mesh(parent, geometry, surface, x = 0, y = 0, z = 0) {
   const object = new THREE.Mesh(geometry, surface);
@@ -101,7 +106,7 @@ export function createMapDecor(journey = {}, previewCoffret = false) {
   const rigs = [
     { ...DECOR_AREAS[0], root: village.root, update: time => updateVillage(village, time) },
     { ...DECOR_AREAS[1], ...createTestTubes() },
-    { ...DECOR_AREAS[2], ...createScentGarden() },
+    { ...DECOR_AREAS[2], ...createProjectVillage() },
     ...[vanilla(), forest()].map((root, i) => ({ ...DECOR_AREAS[i + 3], root, update(time) { root.rotation.z = Math.sin(time * .65) * .012; } })),
     { ...DECOR_AREAS[5], ...createSampleCoffret() },
     { ...DECOR_AREAS[6], ...createInspirationGreenhouse() },
@@ -109,31 +114,11 @@ export function createMapDecor(journey = {}, previewCoffret = false) {
   rigs.forEach(rig => rig.setState?.(state, true));
   return rigs;
 }
-// Cadre orthographique ajusté à chaque objet : aucun village minuscule au centre d'un grand canevas.
-export function fitDecor(root, aspect) {
-  const box = root.userData.framingBox?.clone() ?? new THREE.Box3().setFromObject(root);
-  const center = box.getCenter(new THREE.Vector3());
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 150);
-  camera.position.copy(center).add(new THREE.Vector3(10, 9, 15).normalize().multiplyScalar(35));
-  camera.lookAt(center); camera.updateMatrixWorld(true);
-  const inverse = camera.matrixWorldInverse;
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-  for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
-    const p = new THREE.Vector3(x, y, z).applyMatrix4(inverse);
-    minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
-  }
-  const halfHeight = Math.max((maxY - minY) / 2, (maxX - minX) / (2 * aspect)) * 1.035;
-  const midX = (minX + maxX) / 2, midY = (minY + maxY) / 2;
-  camera.left = midX - halfHeight * aspect; camera.right = midX + halfHeight * aspect;
-  camera.top = midY + halfHeight; camera.bottom = midY - halfHeight; camera.updateProjectionMatrix();
-  return camera;
-}
-
 export function mountMapDecor(container, { onReady, onFallback, journey = {}, previewCoffret = false }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' }); }
   catch { onFallback(); return () => {}; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setPixelRatio(Math.max(2, Math.min(window.devicePixelRatio || 1, 2.5)));
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .9;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true; renderer.autoClear = false;
@@ -144,7 +129,7 @@ export function mountMapDecor(container, { onReady, onFallback, journey = {}, pr
     const scene = new THREE.Scene(); scene.environment = environment.texture; scene.environmentIntensity = .32; scene.add(item.root);
     scene.add(new THREE.HemisphereLight(0xf5f4ec, 0x626849, 1.4));
     const light = new THREE.DirectionalLight(0xffecd7, 2.3); light.position.set(-6, 14, 10); light.castShadow = true;
-    const size = item.kind === 'village' ? 12 : 4;
+    const size = item.kind === 'village' ? 12 : item.kind === 'projectVillage' ? 8 : 4;
     Object.assign(light.shadow.camera, { left: -size, right: size, top: size, bottom: -size, far: 45 });
     light.shadow.mapSize.set(512, 512); light.shadow.bias = -.001; scene.add(light);
     return { ...item, scene, light, camera: fitDecor(item.root, item.width / item.height) };
@@ -160,6 +145,8 @@ export function mountMapDecor(container, { onReady, onFallback, journey = {}, pr
   let playing = true, alive = true, frame = 0, clock = 0, dirty = true, first = true;
   function reduced(event) { motion.setReduced(event.matches); dirty = true; }
   preference.addEventListener('change', reduced);
+  const visible = () => motion.resetFrame();
+  document.addEventListener('visibilitychange', visible);
   function resize() { renderer.setSize(container.clientWidth || 1440, container.clientHeight || 900, false); dirty = true; }
   const observer = new ResizeObserver(resize); observer.observe(container); resize();
   function render(ms) {
@@ -180,7 +167,7 @@ export function mountMapDecor(container, { onReady, onFallback, journey = {}, pr
       if (playing) item.update(clock);
       const lidMoved = previousLid !== undefined && Math.abs(item.root.userData.lid.rotation.x - previousLid) > .001;
       if (first || (item.kind === 'coffret' && (dirty || lidMoved))) renderer.shadowMap.needsUpdate = true;
-      renderer.setViewport(x, y, w, h); renderer.setScissor(x, y, w, h); renderer.clear(); renderer.render(item.scene, item.camera);
+      renderer.setViewport(x, y, w, h); renderer.setScissor(x, y, w, h); renderer.clearDepth(); renderer.render(item.scene, item.camera);
     }
     if (playing) roadside.update(clock);
     renderer.setViewport(0, 0, width, height); renderer.setScissor(0, 0, width, height); renderer.clearDepth(); renderer.render(treeScene, treeCamera);
@@ -191,7 +178,7 @@ export function mountMapDecor(container, { onReady, onFallback, journey = {}, pr
   renderer.domElement.addEventListener('webglcontextlost', lost);
   frame = requestAnimationFrame(render);
   function destroy() {
-    alive = false; cancelAnimationFrame(frame); observer.disconnect(); preference.removeEventListener('change', reduced);
+    alive = false; cancelAnimationFrame(frame); observer.disconnect(); preference.removeEventListener('change', reduced); document.removeEventListener('visibilitychange', visible);
     renderer.domElement.removeEventListener('webglcontextlost', lost);
     const geometries = new Set(), materials = new Set(), textures = new Set();
     items.forEach(({ scene, light }) => { light.shadow.map?.dispose(); scene.traverse(object => {

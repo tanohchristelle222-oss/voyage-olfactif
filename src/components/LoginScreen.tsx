@@ -22,10 +22,10 @@ const copy = {
     title: <>Votre idée.<br />Votre univers.<br />Votre espace.</>,
     subtitle: "Un accompagnement à votre rythme pour vos projets parfumés.",
     welcome: "Bienvenue sur Horizon.",
-    intro: "Personnalisez votre profil pour retrouver votre accueil et vos projets dans ce navigateur.",
-    email: "Email professionnel fictif", password: "Mot de passe de démonstration",
-    hint: "Code fictif fourni. Ne saisissez aucun vrai mot de passe.", customize: "Personnaliser mon profil",
-    first: "Prénom", last: "Nom", company: "Entreprise", country: "Pays de votre entreprise",
+    intro: "Connectez-vous pour retrouver vos projets et suivre vos demandes d’échantillons.",
+    email: "E-mail professionnel", password: "Mot de passe de démonstration",
+    hint: "Code fictif fourni. Ne saisissez aucun vrai mot de passe.", customize: "Vos informations",
+    first: "Prénom", last: "Nom", company: "Entreprise", country: "Pays de l’entreprise",
     submit: "Me connecter", note: "Connexion simulée : utilisez uniquement un profil fictif.",
     alt: "Flacon de parfum entouré de cerises", eyebrow: "GIVAUDAN HORIZON", language: "Langue de la page de connexion",
     register: "Créer un compte", registerTitle: "Créez votre espace.", registerIntro: "Présentez votre entreprise pour commencer votre voyage olfactif.",
@@ -36,9 +36,9 @@ const copy = {
     title: <>Your idea.<br />Your world.<br />Your space.</>,
     subtitle: "Support at your own pace for your fragrance projects.",
     welcome: "Welcome to Horizon.",
-    intro: "Personalise your profile to find your home page and projects in this browser.",
-    email: "Fictional business email", password: "Demo password",
-    hint: "Fictional code provided. Do not enter a real password.", customize: "Personalise my profile",
+    intro: "Sign in to find your projects and track your sample requests.",
+    email: "Business email", password: "Demo password",
+    hint: "Fictional code provided. Do not enter a real password.", customize: "Your details",
     first: "First name", last: "Last name", company: "Company", country: "Company country",
     submit: "Sign in", note: "Simulated sign-in: use a fictional profile only.",
     alt: "Perfume bottle surrounded by cherries", eyebrow: "GIVAUDAN HORIZON", language: "Sign-in page language",
@@ -62,11 +62,11 @@ export default function LoginScreen() {
 
   const profileFields = <>
     <div className="horizon-login-fields">
-      <div><label htmlFor="login-first">{text.first}</label><input id="login-first" name="firstName" maxLength={50} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="given-name" defaultValue={registering ? "" : profile.firstName || "Léa"} /></div>
-      <div><label htmlFor="login-last">{text.last}</label><input id="login-last" name="lastName" maxLength={50} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="family-name" defaultValue={registering ? "" : profile.lastName || "Martin"} /></div>
+      <div><label htmlFor="login-first">{text.first}</label><input id="login-first" name="firstName" maxLength={70} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="given-name" defaultValue={registering ? "" : profile.firstName || "Léa"} /></div>
+      <div><label htmlFor="login-last">{text.last}</label><input id="login-last" name="lastName" maxLength={70} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="family-name" defaultValue={registering ? "" : profile.lastName || "Martin"} /></div>
     </div>
-    <label htmlFor="login-company">{text.company}</label><input id="login-company" name="companyName" maxLength={100} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="organization" defaultValue={registering ? "" : profile.companyName || "Maison Lune"} />
-    <label htmlFor="login-country">{text.country}</label><input id="login-country" name="country" maxLength={70} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="country-name" defaultValue={registering ? "" : profile.country || "France"} />
+    <label htmlFor="login-company">{text.company}</label><input id="login-company" name="companyName" maxLength={150} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="organization" defaultValue={registering ? "" : profile.companyName || "Maison Lune"} />
+    <label htmlFor="login-country">{text.country}</label><input id="login-country" name="country" maxLength={80} required={registering} pattern={registering ? ".*\\S.*" : undefined} autoComplete="country-name" defaultValue={registering ? "" : profile.country || "France"} />
     {registering && <><label htmlFor="login-phone">{text.phone}</label><input id="login-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} /></>}
   </>;
 
@@ -92,23 +92,21 @@ export default function LoginScreen() {
           <form key={JSON.stringify([registering, profile.updatedAt, profile.email, profile.firstName, profile.lastName, profile.companyName, profile.country])} onSubmit={event => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
-            saveProfile({
+            if (registering) saveProfile({
               firstName: String(data.get("firstName")).trim(), lastName: String(data.get("lastName")).trim(),
               companyName: String(data.get("companyName")).trim(), country: String(data.get("country")).trim(),
               email: String(data.get("email")).trim().toLowerCase(),
-              ...(registering ? { phone: String(data.get("phone") || "").trim(), avatarUrl: "", role: "", sector: "" } : {}),
+              phone: String(data.get("phone") || "").trim(), avatarUrl: "", role: "", sector: "",
             });
+            else saveProfile({ email: String(data.get("email")).trim().toLowerCase() });
             enterDemo();
           }}>
             <label htmlFor="login-email">{text.email}</label>
-            <input id="login-email" name="email" type="email" autoComplete="off" required maxLength={150} defaultValue={registering ? "" : profile.email || "lea@maisonlune.example"} placeholder={registering ? "lea@maisonlune.example" : undefined} />
+            <input id="login-email" name="email" type="email" autoComplete="off" required maxLength={200} defaultValue={registering ? "" : profile.email || "lea@maisonlune.example"} placeholder={registering ? "lea@maisonlune.example" : undefined} />
             <label htmlFor="login-password">{text.password}</label>
             <input id="login-password" type="text" value="DEMO-HORIZON" readOnly aria-describedby="login-code-note" />
             <small id="login-code-note">{text.hint}</small>
-            {registering ? <fieldset className="horizon-register-fields"><legend className="sr-only">{text.customize}</legend>{profileFields}</fieldset> : <details>
-              <summary>{text.customize}</summary>
-              {profileFields}
-            </details>}
+            {registering && <fieldset className="horizon-register-fields"><legend className="sr-only">{text.customize}</legend>{profileFields}</fieldset>}
             <button className="horizon-login-submit" type="submit">{registering ? text.registerSubmit : text.submit} <span aria-hidden="true">→</span></button>
           </form>
           <p className="horizon-account-switch">{registering ? text.hasAccount : text.noAccount} <button type="button" onClick={() => setRegistering(!registering)}>{registering ? text.signIn : text.register}</button></p>

@@ -142,3 +142,15 @@ La carte comprend un jardin avec des roses qui s’ouvrent, un petit agrume, une
 Le menu « Votre univers » propose rose, vanille, pistache, agrumes et boisé. Le choix est sauvegardé dans le champ `scentFamily` de l’étape 1 du projet actif. « Selon mon idée » reprend une détection simple par mots-clés dans les réponses ; ce mécanisme visuel ne fait pas appel à l’IA. Les informations personnelles de la maison ne sont pas utilisées pour cette détection. Le choix est transmis au contexte de Nota à l’étape 1.
 
 Le bouton « Aperçu du coffret » ouvre ou referme le coffret sans modifier le projet, terminer une étape ou créer une commande. Un brief déjà marqué comme terminé déclenche aussi l’ouverture. Les étapes 2 à 5 restent les écrans de préparation existants : cet ajout concerne les scènes 3D et ne complète pas leur logique métier. La préférence de mouvement réduit arrête les nouvelles animations ; un changement d’univers reste visible dans ce mode. Les modèles se mettent à jour sans recréer le moteur WebGL. Les images de la serre sont locales et les ressources sont libérées à la fermeture de la page.
+
+
+## Village local dans la zone Votre projet
+
+Le petit jardin montré dans la capture est remplacé uniquement à son emplacement (`projectVillage`, mêmes coordonnées et dimensions). Le village de départ, la route, les autres décors, les formulaires et la navigation sont conservés. La nouvelle scène est construite en volumes Three.js ; elle s’inspire de l’image de référence sans utiliser cette image comme un panneau fixe.
+
+Cinq petits bâtiments entourent une cour. Six personnes pipettent, sentent une touche, trient les pistaches, préparent les échantillons, accueillent les visiteurs et contrôlent la vanille. Un visiteur marche dans la cour ; une camionnette suit une voie périphérique aux virages arrondis. Les orchidées et gousses de vanille, les pistaches ouvertes et leurs amandes vertes, les fioles, les liquides et les vapeurs sont modélisés. Les couleurs des liquides suivent toujours l’univers du projet. La scène compte moins de 550 maillages pour rester compatible avec les autres décors.
+
+Un clic sur ce village ouvre sa vue agrandie animée. Fermer ou Échap revient à la carte. Le bouton d’agrandissement du village de l’étape 1 garde sa fonction initiale. Les tests vérifient les entreprises, les métiers, les mouvements, les trajets hors des bâtiments, le budget géométrique et le cadrage de la scène pendant l’animation. Le rendu WebGL visuel reste à vérifier sur le navigateur de présentation, l’aperçu étant indisponible ici.
+
+## Mise à jour locale : vent et accueil FR/EN
+Vent des sapins renforcé, animations adaptées aux faibles fréquences et au retour sur un onglet. Accueil et navigation FR/EN avec la préférence de connexion. Accents roses Horizon. Les formulaires, le profil et le suivi restent conservés ; leur traduction est à compléter.

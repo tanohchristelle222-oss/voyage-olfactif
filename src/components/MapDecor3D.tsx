@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import VillageAtStart from "./VillageAtStart";
+import ProjectVillageView from "./ProjectVillageView";
 import { saveField, useJourney, type Journey } from "@/lib/journey";
 import { FRAGRANCE_THEMES, fragranceState } from "./village/fragrance-state.mjs";
 
@@ -11,7 +12,7 @@ export default function MapDecor3D({ preview, onReady }: { preview: boolean; onR
   const dialog = useRef<HTMLDialogElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [, setZoomReady] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<"start" | "project" | null>(null);
   const [previewCoffret, setPreviewCoffret] = useState(false);
   const { journey } = useJourney();
   const latest = useRef({ journey, previewCoffret });
@@ -47,6 +48,7 @@ export default function MapDecor3D({ preview, onReady }: { preview: boolean; onR
   return (
     <>
       <div ref={host} className={`map-decor-canvas ${status === "ready" ? "is-ready" : ""}`} aria-hidden="true" />
+      {!preview && status === "ready" && <button type="button" className="project-village-hotspot" onClick={() => setExpanded("project")} aria-label="Explorer le village animé de Votre projet"><span>Explorer le village ↗</span></button>}
       {!preview && (
         <div className="map-decor-controls">
           {status === "ready" ? <>
@@ -56,18 +58,18 @@ export default function MapDecor3D({ preview, onReady }: { preview: boolean; onR
                 {FRAGRANCE_THEMES.map(theme => <option key={theme.key} value={theme.key}>{theme.label}</option>)}
               </select>
             </label>
-            <button type="button" onClick={() => setExpanded(true)}>Agrandir le village <span aria-hidden="true">↗</span></button>
+            <button type="button" onClick={() => setExpanded("start")}>Agrandir le village <span aria-hidden="true">↗</span></button>
             {!fragrance.ready && <button type="button" onClick={() => setPreviewCoffret(!previewCoffret)} aria-pressed={previewCoffret} title="Animation de présentation : ne valide pas le brief et ne crée pas de commande.">{previewCoffret ? "Refermer le coffret" : "Aperçu du coffret"}</button>}
             <span className="fragrance-world-caption" role="status">{fragrance.label}</span>
           </> : <span role="status">{status === "loading" ? "Les décors prennent vie…" : "La vue 3D n’est pas disponible sur ce navigateur. Le parcours reste accessible."}</span>}
         </div>
       )}
-      <dialog ref={dialog} className="village-dialog" onCancel={() => setExpanded(false)} onClose={() => setExpanded(false)}>
+      <dialog ref={dialog} className="village-dialog" onCancel={() => setExpanded(null)} onClose={() => setExpanded(null)}>
         <div className="village-dialog-heading">
-          <div><h2>Votre village des senteurs</h2><p>Les maisons miniatures, les passants et la camionnette prennent vie.</p></div>
-          <button type="button" onClick={() => setExpanded(false)} autoFocus aria-label="Fermer le village agrandi">Fermer ×</button>
+          <div><h2>{expanded === "project" ? "Votre projet prend vie" : "Votre village des senteurs"}</h2><p>{expanded === "project" ? "De la vanille et la pistache aux mélanges et à la préparation de vos échantillons." : "Les maisons miniatures, les passants et la camionnette prennent vie."}</p></div>
+          <button type="button" onClick={() => setExpanded(null)} autoFocus aria-label="Fermer la vue agrandie">Fermer ×</button>
         </div>
-        {expanded && <div className="village-dialog-scene"><VillageAtStart onReady={setZoomReady} /></div>}
+        {expanded && <div className="village-dialog-scene">{expanded === "project" ? <ProjectVillageView /> : <VillageAtStart onReady={setZoomReady} />}</div>}
       </dialog>
     </>
   );

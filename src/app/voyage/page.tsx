@@ -5,7 +5,7 @@ import JourneyMap from "@/components/JourneyMap";
 import NotaGreeting from "@/components/Nota";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Votre voyage · Le Voyage Olfactif" };
+export const metadata: Metadata = { title: "Le Voyage Olfactif · Givaudan Horizon" };
 
 /** La roadmap du projet actif (ouverte par « Nouveau projet » ou depuis « Mes projets »). */
 export default function Voyage() {

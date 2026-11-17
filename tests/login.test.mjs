@@ -60,3 +60,13 @@ test('registration has an English version and a working return to sign-in', () =
   assert.equal(page.state.entered, 0);
   assert.equal(page.state.saved, null);
 });
+
+test('sign-in only requests access details and preserves the existing profile', () => {
+  const page = screen();
+  const nodes = page.nodes();
+  assert.deepEqual(nodes.filter(node => node.type === 'input').map(node => node.props.id), ['login-email', 'login-password']);
+  nodes.find(node => node.type === 'form').props.onSubmit({ preventDefault() {}, currentTarget: { email: ' OLD@EXAMPLE.TEST ' } });
+  assert.deepEqual(Object.keys(page.state.saved), ['email']);
+  assert.equal(page.state.saved.email, 'old@example.test');
+  assert.equal(page.state.entered, 1);
+});

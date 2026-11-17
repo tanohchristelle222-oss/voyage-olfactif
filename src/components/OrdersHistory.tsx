@@ -56,13 +56,17 @@ export default function OrdersHistory() {
     <h1>Mes commandes.</h1>
     <p className="orders-history-intro">Retrouvez votre historique et préparez vos réassorts.</p>
     <div className="orders-history-list">
-      {orders.map(item => <article key={item.id} className="order-history-row" aria-label={`Commande ${item.id}`}>
-        <div className="order-history-top"><h2>{item.id}</h2><span className="order-history-status">{statuses[item.phase] ?? "Statut à confirmer"}</span></div>
-        <p className="order-history-product">{item.name} · {item.quantity}</p>
-        <p className="order-history-meta">{date(item.createdAt)}{demoAmounts[item.id] !== undefined && <> · {price(demoAmounts[item.id])} HT</>} · Simulation</p>
+      {orders.map(item => <article key={item.id} className={`order-history-row${item.phase === 3 ? " is-delivered" : ""}`} aria-label={`Commande ${item.id}`}>
+        <div className="order-history-visual"><img src={item.image} alt={item.name} width={420} height={210} /><span className={`order-history-status${item.phase === 3 ? " received" : ""}`}>{statuses[item.phase] ?? "Statut à confirmer"}</span></div>
+        <div className="order-history-content">
+        <h2 className="order-history-product">{item.name}</h2>
+        <p className="order-history-reference">{item.id}</p>
+        <dl className="order-history-facts"><div><dt>Quantité</dt><dd>{item.quantity}</dd></div><div><dt>Montant HT</dt><dd>{demoAmounts[item.id] !== undefined ? price(demoAmounts[item.id]) : "À confirmer"}</dd></div></dl>
+        <p className="order-history-meta">Commandée le {date(item.createdAt)} · Simulation</p>
+        <p className="order-history-delivery"><span>{item.phase === 3 ? "Livrée le" : "Livraison estimée le"}</span><time dateTime={new Date(item.estimatedAt).toISOString()}>{date(item.estimatedAt)}</time></p>
         <div className="order-history-actions">
           <details className="order-history-tracking">
-            <summary>Suivre la commande</summary>
+            <summary>Suivre la commande <span aria-hidden="true">→</span></summary>
             <div>
               <h3>Suivi de votre commande</h3>
               <ol className="tracking-timeline" aria-label={`Progression de ${item.id}`}>
@@ -74,7 +78,7 @@ export default function OrdersHistory() {
             </div>
           </details>
           <button type="button" onClick={() => setReorder(item)} aria-label={`Commander à nouveau ${item.name}`}>Commander à nouveau <span aria-hidden="true">↗</span></button>
-        </div>
+        </div></div>
       </article>)}
       {orders.length === 0 && <p className="orders-history-empty">Vous n’avez pas encore de commande.</p>}
     </div>

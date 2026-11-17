@@ -19,7 +19,7 @@ export default function Hero({ className = "" }: { className?: string }) {
         {...fade(0.1)}
         className="text-[11px] font-semibold uppercase tracking-[0.2em] text-navy/60"
       >
-        Givaudan · Fragrance &amp; Beauty
+        Givaudan Horizon
       </motion.p>
       <motion.h1
         {...fade(0.2)}

@@ -7,7 +7,7 @@ globalThis.document = { createElement: () => ({ getContext: () => null }) };
 
 test('all roadside illustrations have real 3D geometry fitted inside their map area', () => {
   const items = createMapDecor();
-  assert.deepEqual(items.map(item => item.kind), ['village', 'tubes', 'flowers', 'vanilla', 'forest', 'coffret', 'greenhouse']);
+  assert.deepEqual(items.map(item => item.kind), ['village', 'tubes', 'projectVillage', 'vanilla', 'forest', 'coffret', 'greenhouse']);
   for (const item of items) {
     let meshes = 0;
     item.root.traverse(object => { if (object.isMesh) meshes++; });

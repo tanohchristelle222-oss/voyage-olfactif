@@ -341,6 +341,8 @@ function mount(container, options) {
     let playing = true;
     function reduced(e) { motion.setReduced(e.matches); dirty = true; }
     preference?.addEventListener?.('change', reduced);
+    const visible = () => motion.resetFrame();
+    document.addEventListener('visibilitychange', visible);
     const markers = (options.preview ? [] : village.stages).map((b, i) => { const button = document.createElement('button'); button.type = 'button'; button.className = 'village-access-target ' + (options.completed[i] ? 'finished' : i === options.unlocked ? 'next' : 'locked'); button.disabled = i > options.unlocked && !options.completed[i]; button.setAttribute('aria-label', options.labels[i]); button.innerHTML = ''; button.onclick = () => options.onSelect(i); container.append(button); return button; });
     function resize() { const w = container.clientWidth || 900, h = container.clientHeight || 600, aspect = w / h, distance = Math.max(23, 18 / (2 * Math.tan(THREE.MathUtils.degToRad(17.5)) * aspect)); camera.aspect = aspect; camera.position.copy(cameraDirection).multiplyScalar(distance); camera.position.y += .7; camera.lookAt(0, .7, 0); camera.updateProjectionMatrix(); camera.updateMatrixWorld(true); renderer.setSize(w, h, false); dirty = true; }
     const ro = new ResizeObserver(resize);
@@ -391,7 +393,7 @@ function mount(container, options) {
     } yaw += (targetYaw - yaw) * .12; world.rotation.y = yaw; if (rotating)
         renderer.shadowMap.needsUpdate = true; world.updateMatrixWorld(true); labels(); renderer.render(scene, camera); dirty = false; }
     function destroy() { if (!alive)
-        return; alive = false; cancelAnimationFrame(frame); ro.disconnect(); preference?.removeEventListener?.('change', reduced); if (reset)
+        return; alive = false; cancelAnimationFrame(frame); ro.disconnect(); preference?.removeEventListener?.('change', reduced); document.removeEventListener('visibilitychange', visible); if (reset)
         reset.onclick = null; const geometries = new Set(), materials = new Set(); scene.traverse(o => { if (o.geometry)
         geometries.add(o.geometry); if (o.material)
         (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => materials.add(m)); }); geometries.forEach(g => g.dispose()); const textures = new Set(); materials.forEach(m => { for (const key of ['map', 'bumpMap', 'normalMap', 'roughnessMap'])
@@ -401,4 +403,4 @@ function mount(container, options) {
     frame = requestAnimationFrame(animate);
     return destroy;
 }
-export { mount, createVillage, updateVillage, makeBuilding, makePerson, sampleRoute };
+export { mount, createVillage, updateVillage, makeBuilding, makePerson, makeVan, sampleRoute };

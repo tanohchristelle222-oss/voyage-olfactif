@@ -9,7 +9,7 @@ const futuraText = localFont({ src: "./fonts/futura-text.woff2", variable: "--fo
 const futuraHeadline = localFont({ src: "./fonts/futura-headline.woff2", variable: "--font-givaudan-display", weight: "500 900", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Le Voyage Olfactif",
+  title: "Givaudan Horizon",
   description:
     "Cinq étapes à travers la pyramide olfactive pour transformer votre idée en brief parfumé.",
 };
