@@ -67,7 +67,7 @@ export default function NotaChat({
       className="flex flex-col rounded-3xl bg-white/90 p-5 shadow-xl shadow-navy/10 ring-1 ring-navy/5 backdrop-blur"
     >
       <div className="flex items-center gap-3">
-        <Nota size={48} thinking={waiting} />
+        <Nota size={58} thinking={waiting} />
         <div>
           <p className="font-display text-lg font-medium leading-tight">Nota</p>
           <p className="text-xs text-navy/55">{loading ? "Nota écrit…" : "Votre guide olfactive"}</p>

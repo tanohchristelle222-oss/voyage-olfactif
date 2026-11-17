@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { streamNota, type ChatMessage as Message } from "@/lib/nota";
 
 export function Caret() {
@@ -10,49 +11,215 @@ export function Caret() {
 
 const GREETING = "Bonjour, je suis Nota !\nJe vous guide jusqu'à vos échantillons.";
 
-/** La mascotte : une goutte de parfum qui flotte et cligne des yeux. */
-export function Nota({ size = 64, thinking = false }: { size?: number; thinking?: boolean }) {
-  const gradientId = `nota-body-${useId()}`;
+/** Proportions de l'image public/nota.webp (337 × 520). */
+const NOTA_RATIO = 337 / 520;
+
+/** Position des yeux dans l'image (en % de 337 × 520) et couleur du verre autour, pour les paupières. */
+const EYES = [
+  { left: 26.4, top: 38.6, width: 10.4, height: 6.6, lid: ["#f3dcd6", "#e8cfc3"] },
+  { left: 52.2, top: 37.3, width: 8.6, height: 6.6, lid: ["#f6ddd5", "#f0d4c9"] },
+];
+
+/** Épaule du bras levé (point de rotation), en % de l'image. Calques : nota-body.webp + nota-arm.webp. */
+const SHOULDER = `${(231 / 337) * 100}% ${(285 / 520) * 100}%`;
+
+/** Pose du bras : au repos (levé, comme sur l'image) ou main sous le menton (réflexion). */
+const ARM_IDLE = "rotate(0deg) scale(1) rotate(-20deg) scaleY(1) rotate(20deg)";
+// Le bras pivote vers le visage et se retourne pour que les doigts arrivent sous le menton.
+const ARM_CHIN = "rotate(-134deg) scale(0.8) rotate(-20deg) scaleY(-1) rotate(20deg)";
+
+const INK = "#3a2418"; // brun des yeux de la mascotte : traits du nuage et regard
+
+/** Yeux dessinés qui regardent en l'air vers le nuage (posés sur les yeux de l'image). */
+function LookUpEyes({ blur }: { blur: number }) {
+  return (
+    <>
+      {EYES.map((eye) => (
+        <motion.span
+          key={eye.left}
+          className="absolute overflow-hidden rounded-[50%]"
+          style={{
+            left: `${eye.left - 0.6}%`,
+            top: `${eye.top - 0.4}%`,
+            width: `${eye.width + 1.2}%`,
+            height: `${eye.height + 0.8}%`,
+            background: `linear-gradient(180deg, ${eye.lid[0]} 0%, ${eye.lid[1]} 100%)`,
+            filter: `blur(${blur}px)`,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <motion.span
+            className="absolute rounded-full"
+            style={{
+              left: "2%",
+              top: "-2%",
+              width: "64%",
+              height: "74%",
+              background: `radial-gradient(circle at 40% 35%, #5c3a26 0%, ${INK} 55%, #1c0f08 100%)`,
+            }}
+            initial={{ x: "22%", y: "22%" }}
+            animate={{ x: "0%", y: "0%" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            <span className="absolute rounded-full bg-white" style={{ left: "18%", top: "14%", width: "30%", height: "30%" }} />
+            <span className="absolute rounded-full bg-white/80" style={{ left: "58%", top: "55%", width: "14%", height: "14%" }} />
+          </motion.span>
+        </motion.span>
+      ))}
+    </>
+  );
+}
+
+/** Nuage de pensée avec « ? », relié à la tête par deux petites bulles. */
+function ThoughtCloud({ width, height }: { width: number; height: number }) {
+  const w = width * 0.95;
+  const pop = (delay: number) => ({
+    initial: { scale: 0, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    transition: { type: "spring" as const, stiffness: 320, damping: 16, delay },
+    style: { transformBox: "fill-box" as const, transformOrigin: "center" },
+  });
+  const circles: [number, number, number][] = [
+    [32, 50, 19], [52, 32, 23], [80, 34, 20], [95, 54, 16], [64, 60, 21], [38, 63, 14],
+  ];
   return (
     <motion.svg
-      viewBox="0 0 100 120"
-      width={size}
-      height={size * 1.2}
-      className="shrink-0"
-      animate={thinking ? { y: [0, -12, 0], rotate: [-6, 6, -6] } : { y: [0, -7, 0], rotate: [-2, 2, -2] }}
-      transition={{ duration: thinking ? 0.7 : 3.2, repeat: Infinity, ease: "easeInOut" }}
-      aria-hidden
+      viewBox="0 0 130 110"
+      width={w}
+      height={(w * 110) / 130}
+      className="pointer-events-none absolute overflow-visible"
+      style={{ left: -width * 0.66, top: -height * 0.5 }}
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2 } }}
     >
-      <defs>
-        <linearGradient id={gradientId}x1="0" y1="0" x2="0.4" y2="1">
-          <stop offset="0" stopColor="#fbc4b0" />
-          <stop offset="1" stopColor="#ef8a86" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="50" cy="116" rx="26" ry="4" fill="#000" opacity="0.08" />
-      {/* feuille */}
-      <path d="M52 10 C 58 0, 70 0, 74 4 C 68 10, 60 12, 52 10 Z" fill="#8bb36b" />
-      {/* corps */}
-      <path
-        d="M50 8 C 50 8, 90 56, 90 76 A 40 40 0 0 1 10 76 C 10 56, 50 8, 50 8 Z"
-        fill={`url(#${gradientId})`}
-      />
-      <path d="M30 60 C 26 70, 26 80, 30 88" stroke="#fff" strokeWidth="5" strokeLinecap="round" opacity="0.55" fill="none" />
-      {/* yeux qui clignent */}
-      <motion.g
-        animate={{ scaleY: [1, 1, 0.1, 1, 1] }}
-        transition={{ duration: 4, repeat: Infinity, times: [0, 0.9, 0.93, 0.96, 1] }}
-        style={{ transformBox: "fill-box", transformOrigin: "center" }}
-      >
-        <ellipse cx="38" cy="76" rx="4.5" ry="5.5" fill="#2a2030" />
-        <ellipse cx="62" cy="76" rx="4.5" ry="5.5" fill="#2a2030" />
-        <circle cx="39.5" cy="74" r="1.5" fill="#fff" />
-        <circle cx="63.5" cy="74" r="1.5" fill="#fff" />
+      {/* petites bulles : de la tête vers le nuage */}
+      <motion.circle cx="117" cy="98" r="4" fill="#fff" stroke={INK} strokeWidth="2.2" {...pop(0)} />
+      <motion.circle cx="105" cy="84" r="6.5" fill="#fff" stroke={INK} strokeWidth="2.2" {...pop(0.15)} />
+      {/* nuage (contour = cercles bruns, remplissage = cercles blancs par-dessus) */}
+      <motion.g {...pop(0.3)}>
+        <motion.g animate={{ y: [0, -2.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}>
+          {circles.map(([cx, cy, r]) => (
+            <circle key={`o${cx}`} cx={cx} cy={cy} r={r + 2.4} fill={INK} />
+          ))}
+          {circles.map(([cx, cy, r]) => (
+            <circle key={`i${cx}`} cx={cx} cy={cy} r={r} fill="#fff" />
+          ))}
+          <motion.text
+            x="63"
+            y="50"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontFamily="var(--font-jost)"
+            fontWeight="600"
+            fontSize="38"
+            fill={INK}
+            style={{ transformBox: "fill-box", transformOrigin: "50% 80%" }}
+            animate={{ rotate: [-10, 10, -10] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ?
+          </motion.text>
+        </motion.g>
       </motion.g>
-      <circle cx="30" cy="86" r="5" fill="#f2697a" opacity="0.4" />
-      <circle cx="70" cy="86" r="5" fill="#f2697a" opacity="0.4" />
-      <path d="M44 88 Q 50 94 56 88" stroke="#2a2030" strokeWidth="2.5" strokeLinecap="round" fill="none" />
     </motion.svg>
+  );
+}
+
+/**
+ * La mascotte : un petit flacon d'échantillon qui flotte doucement.
+ * Quand elle réfléchit : main sous le menton, regard vers le haut et nuage « ? ».
+ * `size` règle la largeur de référence ; la hauteur suit les proportions du flacon.
+ */
+export function Nota({ size = 64, thinking = false }: { size?: number; thinking?: boolean }) {
+  const height = Math.round(size * 1.45);
+  const width = Math.round(height * NOTA_RATIO);
+  return (
+    <div className="relative shrink-0" style={{ width, height: height + 6 }} aria-hidden>
+      {/* ombre au sol : rétrécit quand le flacon s'élève */}
+      <motion.span
+        className="absolute bottom-0 left-1/2 h-1.5 -translate-x-1/2 rounded-[50%] bg-black/15 blur-[1px]"
+        style={{ width: width * 0.8 }}
+        animate={{ scaleX: [1, thinking ? 0.94 : 0.8, 1] }}
+        transition={{ duration: thinking ? 2.6 : 3.2, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute left-0 top-0"
+        style={{ transformOrigin: "50% 100%" }}
+        animate={
+          thinking
+            ? // réflexion : la tête penche vers le nuage, presque immobile
+              { y: [0, -2, 0], rotate: [-5, -7, -5], scaleY: 1 }
+            : { y: [0, -6, 0], rotate: [-2, 2, -2], scaleY: [1, 1.02, 1] }
+        }
+        transition={{ duration: thinking ? 2.6 : 3.2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Image src="/nota-body.webp" alt="" width={width} height={height} priority draggable={false} />
+
+        {/* regard vers le haut pendant la réflexion */}
+        <AnimatePresence>{thinking && <LookUpEyes key="regard" blur={width > 70 ? 0.3 : 0} />}</AnimatePresence>
+
+        {/* paupières posées sur les yeux : elles se ferment brièvement pour cligner */}
+        {EYES.map((eye) => (
+          <motion.span
+            key={eye.left}
+            className="absolute rounded-[50%]"
+            style={{
+              left: `${eye.left}%`,
+              top: `${eye.top}%`,
+              width: `${eye.width}%`,
+              height: `${eye.height}%`,
+              background: `linear-gradient(180deg, ${eye.lid[0]} 0%, ${eye.lid[1]} 100%)`,
+              borderBottom: `${Math.max(1.5, width / 70)}px solid ${INK}`,
+              transformOrigin: "50% 0%",
+            }}
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: [0, 0, 1, 0, 0, 1, 0, 0] }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              // un clignement, puis un double clignement de temps en temps
+              times: [0, 0.42, 0.45, 0.48, 0.9, 0.93, 0.96, 1],
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
+        {/* bras : levé au repos, main sous le menton pendant la réflexion */}
+        <div
+          className="absolute inset-0"
+          style={{
+            transformOrigin: SHOULDER,
+            transform: thinking ? ARM_CHIN : ARM_IDLE,
+            transition: "transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1)",
+          }}
+        >
+          <motion.div
+            className="absolute inset-0"
+            style={{ transformOrigin: SHOULDER }}
+            animate={
+              thinking
+                ? // le doigt tapote doucement le menton
+                  { rotate: [0, 0, -5, 0, -5, 0, 0] }
+                : // au repos : un petit salut de temps en temps
+                  { rotate: [0, 0, -12, 2, -8, 0, 0] }
+            }
+            transition={
+              thinking
+                ? { duration: 2.4, repeat: Infinity, times: [0, 0.4, 0.5, 0.6, 0.7, 0.8, 1], ease: "easeInOut" }
+                : { duration: 6, repeat: Infinity, times: [0, 0.55, 0.65, 0.72, 0.8, 0.88, 1], ease: "easeInOut" }
+            }
+          >
+            <Image src="/nota-arm.webp" alt="" width={width} height={height} draggable={false} />
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* nuage de pensée */}
+      <AnimatePresence>{thinking && <ThoughtCloud key="nuage" width={width} height={height} />}</AnimatePresence>
+    </div>
   );
 }
 
@@ -113,7 +280,7 @@ export default function NotaGreeting({ className = "" }: { className?: string })
       transition={{ delay: 0.8, duration: 0.6 }}
       className={`flex items-start gap-3 ${className}`}
     >
-      <Nota thinking={loading && !reply} />
+      <Nota size={84} thinking={loading && !reply} />
       <div className="w-72 max-w-[calc(100vw-7rem)]">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}

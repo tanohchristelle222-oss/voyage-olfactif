@@ -15,7 +15,7 @@ export default function StepComingSoon({ step }: { step: number }) {
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto mt-16 flex max-w-md flex-col items-center text-center"
       >
-        <Nota size={80} />
+        <Nota size={100} />
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.2em] text-navy/55">Étape {step}</p>
         <h1 className="mt-2 font-display text-4xl font-medium">{STEP_LABELS[step - 1]}</h1>
         <p className="mt-3 text-navy/70">Cette étape du voyage est encore en préparation. Revenez bientôt !</p>
