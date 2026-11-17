@@ -11,7 +11,7 @@ export type StepAnswer = {
   /** Champs libres propres à une étape (ex. nom de la maison, secteur). */
   fields?: Record<string, string>;
 };
-export type Journey = { answers: Record<number, StepAnswer>; completed: number[] };
+export type Journey = { answers: Record<number, StepAnswer>; completed: number[]; legacyAnswers?: Record<number, StepAnswer> };
 export type Project = { id: string; createdAt: number; journey: Journey };
 /** `v` : version du parcours (2 = 5 étapes). Absent = ancien parcours en 7 étapes. */
 type Store = { v?: number; activeId: string | null; projects: Project[] };
@@ -30,8 +30,17 @@ function migrate(store: Store): Store {
         const step = OLD_TO_NEW[Number(oldStep)];
         if (step) answers[step] = answer;
       }
+      const target = p.journey.answers[3];
+      if (target) {
+        const project = answers[1] ?? { text: "", tags: [] };
+        answers[1] = {
+          ...project,
+          tags: [...new Set([...project.tags, ...target.tags])],
+          fields: { ...project.fields, target: project.fields?.target || target.text },
+        };
+      }
       const completed = p.journey.completed.map((s) => OLD_TO_NEW[s]).filter(Boolean).sort();
-      return { ...p, journey: { answers, completed } };
+      return { ...p, journey: { answers, completed, legacyAnswers: p.journey.answers } };
     }),
   };
 }
@@ -63,12 +72,13 @@ const listeners = new Set<() => void>();
 
 // Copie en mémoire : la page marche même si le navigateur bloque le stockage.
 let memory: string | null = null;
+let storageUnavailable = false;
 let cachedRaw: string | undefined;
 let cached: Store = EMPTY_STORE;
 
 function read(key: string, fallback: string | null = null): string | null {
   try {
-    return localStorage.getItem(key) ?? fallback;
+    return key === KEY && storageUnavailable ? fallback : localStorage.getItem(key) ?? fallback;
   } catch {
     return fallback;
   }
@@ -110,7 +120,9 @@ function writeStore(store: Store) {
   memory = raw;
   try {
     localStorage.setItem(KEY, raw);
+    storageUnavailable = false;
   } catch {
+    storageUnavailable = true;
     /* stockage indisponible : on garde la copie en mémoire */
   }
   listeners.forEach((l) => l());

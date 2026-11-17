@@ -3,24 +3,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
+import MapDecor3D from "./MapDecor3D";
+import { ROAD } from "./village/journey-route.mjs";
 import { STEP_LABELS, useJourney } from "@/lib/journey";
 import { Bottles, Flowers, Forest, IllustrationDefs, Shop, Vanilla } from "./Illustrations";
 
 /* Repère de la carte : viewBox "0 60 1440 900" (ratio 1.6). */
 
-const ROAD =
-  "M -80 1120 C 60 960, 120 885, 164 855 " +
-  "C 260 790, 470 760, 536 692 " +
-  "C 590 640, 520 590, 420 580 " +
-  "C 320 570, 330 470, 480 470 " +
-  "C 560 470, 610 488, 665 488 " +
-  "C 760 488, 850 600, 942 592 " +
-  "C 1040 585, 1120 520, 1185 513 " +
-  "C 1290 500, 1290 410, 1150 400 " +
-  "C 1040 392, 900 400, 930 342 " +
-  "C 960 285, 1060 268, 1140 259 " +
-  // fin de la route : elle arrive sur le seuil en bois du laboratoire (étape 5)
-  "C 1172 255, 1196 262, 1220 268";
 
 type Step = { n: number; x: number; y: number; ring: string; label: string };
 type Status = "done" | "current" | "locked";
@@ -36,7 +25,7 @@ export const POSITIONS = [
 const STEPS: Step[] = POSITIONS.map((p, i) => ({ ...p, n: i + 1, label: STEP_LABELS[i] }));
 
 const ZONES = [
-  { label: "Notes de tête · Le verger", dot: "#a4b26a", left: "2.9%", top: "61.5%", delay: 1.4 },
+  { label: "Notes de tête · Le verger", dot: "#a4b26a", left: "2.9%", top: "45%", delay: 1.4 },
   { label: "L'atelier du parfumeur", dot: "#0b1215", left: "69.5%", top: "2.4%", delay: 2.4 },
   { label: "Notes de cœur · Les champs de fleurs", dot: "#9678b0", left: "41.8%", top: "93.5%", delay: 1.8 },
   { label: "Notes de fond · La forêt", dot: "#c28921", left: "79.9%", top: "93.5%", delay: 2.1 },
@@ -145,7 +134,7 @@ function Milestone({ step, index, status, onHover, onOpen }: MilestoneProps) {
           ) : (
             <text
               y="-51" textAnchor="middle" dominantBaseline="central"
-              fontFamily="var(--font-jost)" fontWeight="600" fontSize="18" fill="#0b1215"
+              fontFamily="var(--font-givaudan-text)" fontWeight="600" fontSize="18" fill="#0b1215"
             >
               {step.n}
             </text>
@@ -189,6 +178,7 @@ export default function JourneyMap({
   /** Éléments alignés sur le bord gauche de l'écran. */
   edgeOverlay?: React.ReactNode;
 }) {
+  const [decorReady, setDecorReady] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
@@ -314,14 +304,15 @@ export default function JourneyMap({
         </g>
 
         {/* Lueur qui parcourt la route */}
-        <g opacity="0">
+        {!decorReady && <g opacity="0">
           <animate attributeName="opacity" from="0" to="1" begin="2.6s" dur="0.6s" fill="freeze" />
           <circle r="16" fill="url(#traveler)">
             <animateMotion dur="18s" begin="2.6s" repeatCount="indefinite" path={ROAD} />
           </circle>
-        </g>
+        </g>}
 
-        {/* Illustrations */}
+        {/* Les illustrations SVG restent disponibles si WebGL ne fonctionne pas. */}
+        <g visibility={decorReady ? "hidden" : "visible"}>
         <motion.g initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8 }}>
           <Shop />
         </motion.g>
@@ -335,7 +326,8 @@ export default function JourneyMap({
           <Vanilla />
           <Forest />
         </motion.g>
-        {/* L'atelier du parfumeur : le laboratoire des échantillons (étape 5), au bout de la route */}
+        </g>
+        {/* Le laboratoire reste visible avec les décors 3D. */}
         <motion.g
           initial={{ opacity: 0, y: -24, scale: 0.92 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -347,6 +339,9 @@ export default function JourneyMap({
           <image href="/atelier.webp" x="1164" y="93" width="260" height="231" preserveAspectRatio="xMidYMid meet" />
         </motion.g>
 
+      </svg>
+      <MapDecor3D preview={preview} onReady={setDecorReady} />
+      <svg viewBox="0 60 1440 900" className="map-milestones absolute inset-0 h-full w-full" style={{ overflow: "visible", pointerEvents: "none" }} aria-label="Étapes du voyage">
         {/* Étapes */}
         {STEPS.map((s, i) => (
           <Milestone key={s.n} step={s} index={i} status={statusOf(s.n)} onHover={setHovered} onOpen={open} />

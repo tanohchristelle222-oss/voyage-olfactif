@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import NotaChat from "@/components/NotaChat";
+import { fragranceState } from "../village/fragrance-state.mjs";
 import { completeStep, EMPTY_ANSWER, PRODUCT_TYPES, saveAnswer, saveField, useJourney } from "@/lib/journey";
 import { useProfile } from "@/lib/profile";
 import StepShell from "./StepShell";
@@ -58,7 +59,7 @@ export default function StepProject() {
     ? `Sa maison : ${houseName} (secteur : ${profile.sector || "non précisé"}).`
     : "";
   const targetSummary = `Cible : ${targetTags.join(", ") || "non précisée"}${target.trim() ? ` — "${target.trim()}"` : ""}.`;
-  const context = `L'utilisateur est à l'étape 1 « Votre projet ». ${houseContext} Son idée de parfum : "${
+  const context = `L'utilisateur est à l'étape 1 « Votre projet ». ${houseContext} Univers olfactif choisi : ${fragranceState(journey).label}. Son idée de parfum : "${
     text.trim() || "(pas encore écrite)"
   }". Mots-clés : ${ideaTags.join(", ") || "aucun"}. ${targetSummary} Aide-le à préciser son idée (ambiance, émotion, occasion, type de produit) et sa cible (à qui s'adresse le parfum). Ne parle pas encore des contraintes ni des familles olfactives : ce sont les étapes suivantes.`;
 
