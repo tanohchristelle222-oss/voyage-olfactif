@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
 import { STEP_LABELS, useJourney } from "@/lib/journey";
-import { Bottles, Dome, Flowers, Forest, IllustrationDefs, Shop, Vanilla } from "./Illustrations";
+import { Bottles, Flowers, Forest, IllustrationDefs, Shop, Vanilla } from "./Illustrations";
 
 /* Repère de la carte : viewBox "0 60 1440 900" (ratio 1.6). */
 
@@ -19,7 +19,8 @@ const ROAD =
   "C 1290 500, 1290 410, 1150 400 " +
   "C 1040 392, 900 400, 930 342 " +
   "C 960 285, 1060 268, 1140 259 " +
-  "C 1210 250, 1260 205, 1290 180";
+  // fin de la route : elle arrive sur le seuil en bois du laboratoire (étape 5)
+  "C 1172 255, 1196 262, 1220 268";
 
 type Step = { n: number; x: number; y: number; ring: string; label: string };
 type Status = "done" | "current" | "locked";
@@ -30,7 +31,7 @@ export const POSITIONS = [
   { x: 665, y: 488, ring: "#a4b26a" }, // 2. Les contraintes — le verger
   { x: 942, y: 592, ring: "#9678b0" }, // 3. Famille olfactive — les champs de fleurs
   { x: 1185, y: 513, ring: "#c28921" }, // 4. Votre brief — la forêt
-  { x: 1140, y: 259, ring: "#0b1215" }, // 5. Vos échantillons — l'atelier du parfumeur
+  { x: 1040, y: 276, ring: "#0b1215" }, // 5. Vos échantillons — juste avant l'atelier du parfumeur
 ];
 const STEPS: Step[] = POSITIONS.map((p, i) => ({ ...p, n: i + 1, label: STEP_LABELS[i] }));
 
@@ -281,6 +282,17 @@ export default function JourneyMap({
             {...draw()}
           />
         </mask>
+        {/* Fondu de la fin de la route : elle s'efface doucement en entrant dans le laboratoire */}
+        <linearGradient id="road-end-fade" gradientUnits="userSpaceOnUse" x1="1185" y1="250" x2="1222" y2="280">
+          <stop offset="0" stopColor="#fff" />
+          <stop offset="1" stopColor="#000" />
+        </linearGradient>
+        <mask id="road-end" maskUnits="userSpaceOnUse" x="-2000" y="-1500" width="5440" height="4000">
+          <rect x="-2000" y="-1500" width="5440" height="4000" fill="#fff" />
+          {/* uniquement autour de l'entrée du labo (la boucle de l'étape 4, plus bas, n'est pas touchée) */}
+          <rect x="1100" y="200" width="500" height="150" fill="url(#road-end-fade)" />
+        </mask>
+        <g mask="url(#road-end)">
         <g mask="url(#road-reveal)" fill="none" strokeLinecap="round" strokeLinejoin="round">
           {/* ombre portée au sol */}
           <path d={ROAD} stroke="#5a4426" strokeWidth="74" opacity="0.16" transform={`translate(6 ${ROAD_DEPTH + 14})`} filter="url(#road-shadow)" />
@@ -298,6 +310,7 @@ export default function JourneyMap({
           <path d={ROAD} stroke="#ffffff" strokeWidth="10" opacity="0.8" transform="translate(-3 -9)" />
           {/* marquage central */}
           <path d={ROAD} stroke="#d8c39b" strokeWidth="3.5" strokeDasharray="16 14" />
+        </g>
         </g>
 
         {/* Lueur qui parcourt la route */}
@@ -322,10 +335,16 @@ export default function JourneyMap({
           <Vanilla />
           <Forest />
         </motion.g>
-        <motion.g initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.4, duration: 0.9 }}>
-          <motion.g animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 3.3 }}>
-            <Dome />
-          </motion.g>
+        {/* L'atelier du parfumeur : le laboratoire des échantillons (étape 5), au bout de la route */}
+        <motion.g
+          initial={{ opacity: 0, y: -24, scale: 0.92 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 2.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
+        >
+          <ellipse cx="1308" cy="318" rx="122" ry="14" fill="#3b2a12" opacity="0.1" />
+          {/* le seuil en bois (en bas à gauche de l'image) tombe pile au bout de la route */}
+          <image href="/atelier.webp" x="1164" y="93" width="260" height="231" preserveAspectRatio="xMidYMid meet" />
         </motion.g>
 
         {/* Étapes */}

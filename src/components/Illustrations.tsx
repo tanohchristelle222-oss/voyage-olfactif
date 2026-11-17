@@ -142,48 +142,6 @@ export function Flowers() {
   );
 }
 
-function Sparkle({ x, y, delay }: { x: number; y: number; delay: number }) {
-  return (
-    <motion.path
-      d={`M${x} ${y - 7} L${x + 2} ${y - 2} L${x + 7} ${y} L${x + 2} ${y + 2} L${x} ${y + 7} L${x - 2} ${y + 2} L${x - 7} ${y} L${x - 2} ${y - 2} Z`}
-      fill="#e9cd8c"
-      animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
-      transition={{ duration: 2.4, repeat: Infinity, delay }}
-      style={center}
-    />
-  );
-}
-
-/** L'atelier du parfumeur : cloche en verre avec deux flacons. */
-export function Dome() {
-  return (
-    <g transform="translate(1228 62)">
-      <ellipse cx="82" cy="172" rx="96" ry="14" fill="#000" opacity="0.08" />
-      <ellipse cx="82" cy="158" rx="90" ry="16" fill="#c28921" />
-      <rect x="-8" y="146" width="180" height="12" fill="#d4ad5c" />
-      <ellipse cx="82" cy="146" rx="90" ry="16" fill="#ebd295" />
-      {/* flacon crème */}
-      <rect x="36" y="88" width="18" height="10" rx="2" fill="#c28921" />
-      <rect x="26" y="98" width="38" height="50" rx="5" fill="#f7f1e8" stroke="#e2d5c2" strokeWidth="2" />
-      <rect x="33" y="110" width="24" height="22" fill="#fff" stroke="#e2d5c2" strokeWidth="1.5" />
-      {/* flacon bleu nuit */}
-      <rect x="88" y="62" width="26" height="14" rx="2" fill="#0b1215" />
-      <rect x="94" y="76" width="14" height="6" fill="#c28921" />
-      <rect x="78" y="82" width="46" height="66" rx="6" fill="#1c2328" />
-      <rect x="88" y="98" width="26" height="30" fill="#f7f1e8" />
-      <rect x="92" y="102" width="18" height="22" fill="none" stroke="#c28921" strokeWidth="1.2" />
-      <rect x="82" y="88" width="4" height="54" rx="2" fill="#fff" opacity="0.25" />
-      {/* cloche */}
-      <path d="M14 146 L14 70 A 68 68 0 0 1 150 70 L150 146" fill="#fff" fillOpacity="0.3" stroke="#fff" strokeWidth="3" strokeOpacity="0.95" />
-      <path d="M30 120 L30 72 A 52 52 0 0 1 60 26" stroke="#fff" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.7" />
-      <ellipse cx="82" cy="-2" rx="9" ry="6" fill="#ebd295" />
-      <Sparkle x={0} y={40} delay={0} />
-      <Sparkle x={170} y={20} delay={0.8} />
-      <Sparkle x={160} y={110} delay={1.6} />
-    </g>
-  );
-}
-
 function Drop({ x, y, s, delay }: { x: number; y: number; s: number; delay: number }) {
   return (
     <motion.path
