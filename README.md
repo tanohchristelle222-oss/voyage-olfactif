@@ -2,17 +2,17 @@
 
 Application web qui guide une marque, étape par étape, de l'idée d'un parfum jusqu'au brief et aux échantillons. Elle a été réalisée dans le cadre du hackathon Givaudan (HETIC).
 
-Le parcours se présente comme une **roadmap animée** en 7 étapes. Nota, une petite goutte de parfum animée, accompagne l'utilisateur grâce à une IA locale (Ollama).
+Le parcours se présente comme une **roadmap animée** en 5 étapes. Nota, un petit flacon d'échantillon animé, accompagne l'utilisateur grâce à une IA locale (Ollama).
 
-## Les 7 étapes
+## Les 5 étapes
 
-1. Votre maison
-2. Votre projet
-3. Votre cible
-4. Famille olfactive
-5. Les contraintes
-6. Votre brief
-7. Vos échantillons
+1. Votre projet (idée, type de produit et cible)
+2. Les contraintes
+3. Famille olfactive
+4. Votre brief
+5. Vos échantillons
+
+La maison (la marque du client) est renseignée une fois pour toutes dans le profil. Elle le sera plus tard à l'inscription.
 
 ## Pages
 
@@ -20,9 +20,9 @@ Le parcours se présente comme une **roadmap animée** en 7 étapes. Nota, une p
 |---|---|
 | `/` | Accueil : présentation et aperçu animé de la roadmap |
 | `/voyage` | La roadmap du projet actif (route en relief, épingles, illustrations) |
-| `/etape/1` à `/etape/7` | Les étapes. Les étapes 1 et 2 sont codées, les suivantes sont en préparation |
+| `/etape/1` à `/etape/5` | Les étapes. L'étape 1 est codée, les suivantes sont en préparation |
 | `/projets` | Mes projets : un voyage par projet, avec son état et sa progression |
-| `/profil` | Mon profil et les informations de la marque |
+| `/profil` | Mon profil et les informations de la maison |
 
 ## Stack
 

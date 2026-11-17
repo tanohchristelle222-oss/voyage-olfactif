@@ -13,20 +13,33 @@ export type StepAnswer = {
 };
 export type Journey = { answers: Record<number, StepAnswer>; completed: number[] };
 export type Project = { id: string; createdAt: number; journey: Journey };
-type Store = { activeId: string | null; projects: Project[] };
+/** `v` : version du parcours (2 = 5 étapes). Absent = ancien parcours en 7 étapes. */
+type Store = { v?: number; activeId: string | null; projects: Project[] };
 
-export const STEP_LABELS = [
-  "Votre maison",
-  "Votre projet",
-  "Votre cible",
-  "Famille olfactive",
-  "Les contraintes",
-  "Votre brief",
-  "Vos échantillons",
-];
+/** Ancien parcours (7 étapes) → nouveau (5 étapes). La maison (1) et la cible (3) ne sont plus des étapes. */
+const OLD_TO_NEW: Record<number, number> = { 2: 1, 5: 2, 4: 3, 6: 4, 7: 5 };
+
+function migrate(store: Store): Store {
+  if (store.v === 2) return store;
+  return {
+    v: 2,
+    activeId: store.activeId,
+    projects: store.projects.map((p) => {
+      const answers: Record<number, StepAnswer> = {};
+      for (const [oldStep, answer] of Object.entries(p.journey.answers)) {
+        const step = OLD_TO_NEW[Number(oldStep)];
+        if (step) answers[step] = answer;
+      }
+      const completed = p.journey.completed.map((s) => OLD_TO_NEW[s]).filter(Boolean).sort();
+      return { ...p, journey: { answers, completed } };
+    }),
+  };
+}
+
+export const STEP_LABELS = ["Votre projet", "Les contraintes", "Famille olfactive", "Votre brief", "Vos échantillons"];
 export const TOTAL_STEPS = STEP_LABELS.length;
 
-/** Secteurs proposés pour la maison (étape 1 et page profil). */
+/** Secteurs proposés pour la maison (page profil). */
 export const SECTORS = [
   "Parfumerie fine",
   "Cosmétique & soin",
@@ -36,7 +49,7 @@ export const SECTORS = [
   "Autre",
 ];
 
-/** Types de produit proposés à l'étape 2. */
+/** Types de produit proposés à l'étape 1. */
 export const PRODUCT_TYPES = ["Eau de parfum", "Eau de toilette", "Brume", "Bougie", "Soin parfumé"];
 
 export const EMPTY_ANSWER: StepAnswer = { text: "", tags: [] };
@@ -69,10 +82,10 @@ function getSnapshot(): Store {
     cachedRaw = signature;
     try {
       if (raw) {
-        cached = { ...EMPTY_STORE, ...JSON.parse(raw) };
+        cached = migrate({ ...EMPTY_STORE, ...JSON.parse(raw) });
       } else if (legacy) {
         const journey: Journey = { ...EMPTY, ...JSON.parse(legacy) };
-        cached = { activeId: "p-1", projects: [{ id: "p-1", createdAt: 0, journey }] };
+        cached = migrate({ activeId: "p-1", projects: [{ id: "p-1", createdAt: 0, journey }] });
       } else {
         cached = EMPTY_STORE;
       }
@@ -107,17 +120,16 @@ function newProject(journey: Journey = EMPTY): Project {
   return { id: `p-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, createdAt: Date.now(), journey };
 }
 
-/** Crée un projet, le rend actif et renvoie son id. Les infos de la maison sont reprises du projet actif. */
+/** Crée un projet vide, le rend actif et renvoie son id. */
 export function createProject(): string {
   const store = getSnapshot();
-  const house = store.projects.find((p) => p.id === store.activeId)?.journey.answers[1];
-  const project = newProject(house ? { answers: { 1: house }, completed: [] } : EMPTY);
-  writeStore({ activeId: project.id, projects: [...store.projects, project] });
+  const project = newProject();
+  writeStore({ v: 2, activeId: project.id, projects: [...store.projects, project] });
   return project.id;
 }
 
 export function setActiveProject(id: string) {
-  writeStore({ ...getSnapshot(), activeId: id });
+  writeStore({ ...getSnapshot(), v: 2, activeId: id });
 }
 
 /** Modifie le voyage du projet actif (le crée s'il n'y en a pas encore). */
@@ -131,6 +143,7 @@ export function saveJourney(update: (j: Journey) => Journey) {
     activeId = project.id;
   }
   writeStore({
+    v: 2,
     activeId,
     projects: projects.map((p) => (p.id === activeId ? { ...p, journey: update(p.journey) } : p)),
   });

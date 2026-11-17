@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import StepComingSoon from "@/components/steps/StepComingSoon";
-import StepHouse from "@/components/steps/StepHouse";
 import StepProject from "@/components/steps/StepProject";
 
-// Les 7 étapes sont connues à l'avance : Next.js peut les préparer d'avance.
+/** Nombre d'étapes du voyage (voir STEP_LABELS dans lib/journey). */
+const TOTAL_STEPS = 5;
+
+// Les étapes sont connues à l'avance : Next.js peut les préparer d'avance.
 export function generateStaticParams() {
-  return Array.from({ length: 7 }, (_, i) => ({ n: String(i + 1) }));
+  return Array.from({ length: TOTAL_STEPS }, (_, i) => ({ n: String(i + 1) }));
 }
 
 export default function StepPage({ params }: PageProps<"/etape/[n]">) {
@@ -25,8 +27,7 @@ export default function StepPage({ params }: PageProps<"/etape/[n]">) {
 async function StepContent({ params }: { params: PageProps<"/etape/[n]">["params"] }) {
   const { n } = await params;
   const step = Number(n);
-  if (!Number.isInteger(step) || step < 1 || step > 7) notFound();
-  if (step === 1) return <StepHouse />;
-  if (step === 2) return <StepProject />;
+  if (!Number.isInteger(step) || step < 1 || step > TOTAL_STEPS) notFound();
+  if (step === 1) return <StepProject />;
   return <StepComingSoon step={step} />;
 }

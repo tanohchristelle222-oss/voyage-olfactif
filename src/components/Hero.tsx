@@ -30,7 +30,7 @@ export default function Hero({ className = "" }: { className?: string }) {
         {...fade(0.35)}
         className="mt-4 max-w-[34rem] text-base sm:text-[1.05rem] leading-relaxed text-navy/75"
       >
-        Sept étapes à travers la pyramide olfactive pour transformer votre idée en brief parfumé —
+        Cinq étapes à travers la pyramide olfactive pour transformer votre idée en brief parfumé —
         et recevoir vos échantillons.
       </motion.p>
       <motion.div {...fade(0.5)} className="mt-6 flex flex-wrap items-center gap-4">
@@ -41,7 +41,7 @@ export default function Hero({ className = "" }: { className?: string }) {
           {journey.completed.length > 0 ? `Continuer · étape ${current}` : "Commencer le voyage"}
           <span className="transition-transform group-hover:translate-x-1">→</span>
         </Link>
-        <span className="text-xs text-navy/60">≈ 7 min · Sauvegarde automatique</span>
+        <span className="text-xs text-navy/60">≈ 5 min · Sauvegarde automatique</span>
       </motion.div>
     </div>
   );

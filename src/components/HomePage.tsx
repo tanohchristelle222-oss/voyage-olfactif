@@ -13,8 +13,8 @@ const fadeUp = (delay: number) => ({
 });
 
 const PHASES = [
-  { n: 1, title: "Comprendre", text: "Votre maison, votre projet et votre cible.", color: "#a4b26a" },
-  { n: 2, title: "Créer", text: "Familles olfactives et contraintes, guidé par Nota.", color: "#9678b0" },
+  { n: 1, title: "Comprendre", text: "Votre projet et votre cible.", color: "#a4b26a" },
+  { n: 2, title: "Créer", text: "Vos contraintes et votre famille olfactive, guidé par Nota.", color: "#9678b0" },
   { n: 3, title: "Recevoir", text: "Votre brief validé et vos échantillons suivis.", color: "#c28921" },
 ];
 
@@ -47,7 +47,7 @@ export default function HomePage() {
             Donnez vie à votre prochain parfum.
           </motion.h1>
           <motion.p {...fadeUp(0.38)} className="mt-5 max-w-lg leading-relaxed text-navy/70">
-            Un voyage guidé en 7 étapes à travers la pyramide olfactive : nous comprenons votre besoin, construisons
+            Un voyage guidé en 5 étapes à travers la pyramide olfactive : nous comprenons votre besoin, construisons
             votre brief avec vous et vous envoyons vos échantillons.
           </motion.p>
           <motion.div {...fadeUp(0.5)} className="mt-8 flex flex-wrap gap-3">

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { saveField, SECTORS, useJourney, useProjects } from "@/lib/journey";
+import { SECTORS, useProjects } from "@/lib/journey";
 import { initialsOf, saveProfile, useProfile } from "@/lib/profile";
 
 const fadeUp = (delay: number) => ({
@@ -16,27 +16,18 @@ const inputClass =
 
 export default function ProfilePage() {
   const profile = useProfile();
-  const { journey } = useJourney();
   const { projects } = useProjects();
   const [saved, setSaved] = useState(false);
 
-  const house = journey.answers[1];
-  const houseName = house?.fields?.name ?? "";
-  const sector = house?.fields?.sector ?? "";
-
-  // Statistiques sur l'ensemble des projets.
+  // Statistiques sur l'ensemble des projets (étape 4 = brief, étape 5 = échantillons).
   const stats = [
     { value: projects.length, label: "Projets" },
-    { value: projects.filter((p) => p.journey.completed.includes(6)).length, label: "Briefs validés" },
-    { value: projects.filter((p) => p.journey.completed.includes(7)).length, label: "Échantillons reçus" },
+    { value: projects.filter((p) => p.journey.completed.includes(4)).length, label: "Briefs validés" },
+    { value: projects.filter((p) => p.journey.completed.includes(5)).length, label: "Échantillons reçus" },
   ];
 
   function update(patch: Parameters<typeof saveProfile>[0]) {
     saveProfile(patch);
-    setSaved(true);
-  }
-  function updateHouse(field: "name" | "sector", value: string) {
-    saveField(1, field, value);
     setSaved(true);
   }
 
@@ -103,15 +94,15 @@ export default function ProfilePage() {
         >
           <h2 className="font-display text-xl font-medium">Informations de la marque</h2>
           <p className="mt-1 text-sm text-navy/55">
-            Le nom et le secteur sont partagés avec l&apos;étape 1 du voyage.
+            Votre maison est utilisée dans tous vos projets : Nota en tient compte pour vous conseiller.
           </p>
 
           <div className="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2">
             <Field label="Nom de la maison" htmlFor="p-maison">
               <input
                 id="p-maison"
-                value={houseName}
-                onChange={(e) => updateHouse("name", e.target.value)}
+                value={profile.houseName}
+                onChange={(e) => update({ houseName: e.target.value })}
                 placeholder="Ex. : Maison Lumière"
                 className={inputClass}
               />
@@ -119,8 +110,8 @@ export default function ProfilePage() {
             <Field label="Secteur" htmlFor="p-secteur">
               <select
                 id="p-secteur"
-                value={sector}
-                onChange={(e) => updateHouse("sector", e.target.value)}
+                value={profile.sector}
+                onChange={(e) => update({ sector: e.target.value })}
                 className={`${inputClass} appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22><path d=%22M2 4l4 4 4-4%22 fill=%22none%22 stroke=%22%230b1215%22 stroke-width=%221.5%22/></svg>')] bg-[length:12px] bg-[position:right_1rem_center] bg-no-repeat pr-10`}
               >
                 <option value="">Choisir un secteur</option>

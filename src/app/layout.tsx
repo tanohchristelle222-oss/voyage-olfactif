@@ -8,7 +8,7 @@ const jost = Jost({ variable: "--font-jost", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Le Voyage Olfactif",
   description:
-    "Sept étapes à travers la pyramide olfactive pour transformer votre idée en brief parfumé.",
+    "Cinq étapes à travers la pyramide olfactive pour transformer votre idée en brief parfumé.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -23,8 +23,9 @@ type Status = { label: string; color: string; bg: string; tint: string };
 
 function statusOf(project: Project): Status {
   const { completed } = project.journey;
-  if (completed.includes(7)) return { label: "Échantillons envoyés", color: "#a4b26a", bg: "#eef1e2", tint: "#e9ecd6" };
-  if (completed.includes(6)) return { label: "Brief validé", color: "#c28921", bg: "#f6eedc", tint: "#efe6d2" };
+  // étape 5 = échantillons, étape 4 = brief
+  if (completed.includes(5)) return { label: "Échantillons envoyés", color: "#a4b26a", bg: "#eef1e2", tint: "#e9ecd6" };
+  if (completed.includes(4)) return { label: "Brief validé", color: "#c28921", bg: "#f6eedc", tint: "#efe6d2" };
   if (completed.length === 0) return { label: "À démarrer", color: "#9a9a9a", bg: "#f2f2f2", tint: "#f2f2f2" };
   return {
     label: `En cours · Étape ${currentStepOf(project.journey)}`,
@@ -93,9 +94,8 @@ export default function ProjectsPage() {
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((project, i) => {
             const { answers, completed } = project.journey;
-            const house = answers[1]?.fields;
-            const type = answers[2]?.tags.find((t) => PRODUCT_TYPES.includes(t)) ?? "";
-            const name = answers[2]?.fields?.name?.trim() || house?.name?.trim() || "";
+            const type = answers[1]?.tags.find((t) => PRODUCT_TYPES.includes(t)) ?? "";
+            const name = answers[1]?.fields?.name?.trim() || profile.houseName.trim() || "";
             const title = name ? `${type || "Projet"} « ${name} »` : type || "Nouveau projet";
             const status = statusOf(project);
             const progress = completed.length / TOTAL_STEPS;
@@ -126,7 +126,7 @@ export default function ProjectsPage() {
                 <div className="px-3 pb-3 pt-4">
                   <p className="font-display text-lg font-medium leading-snug">{title}</p>
                   <p className="mt-0.5 text-sm text-navy/55">
-                    {house?.sector || "Secteur à définir"} · {profile.country || "Pays à définir"}
+                    {profile.sector || "Secteur à définir"} · {profile.country || "Pays à définir"}
                   </p>
 
                   <span

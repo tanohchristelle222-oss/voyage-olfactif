@@ -2,19 +2,21 @@
 
 import { useSyncExternalStore } from "react";
 
-/* Profil de l'utilisateur, sauvegardé dans le navigateur (localStorage).
-   Le nom et le secteur de la maison, eux, viennent de l'étape 1 du voyage (lib/journey). */
+/* Profil de l'utilisateur et de sa maison, sauvegardé dans le navigateur (localStorage).
+   La maison sera renseignée à l'inscription ; en attendant, elle se modifie dans « Mon profil ». */
 
 export type Profile = {
   firstName: string;
   role: string;
+  houseName: string;
+  sector: string;
   country: string;
   email: string;
   phone: string;
 };
 
 const KEY = "voyage-olfactif:profil";
-const DEFAULT: Profile = { firstName: "", role: "", country: "", email: "", phone: "" };
+const DEFAULT: Profile = { firstName: "", role: "", houseName: "", sector: "", country: "", email: "", phone: "" };
 const listeners = new Set<() => void>();
 
 let memory: string | null = null;

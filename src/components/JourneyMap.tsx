@@ -24,14 +24,13 @@ const ROAD =
 type Step = { n: number; x: number; y: number; ring: string; label: string };
 type Status = "done" | "current" | "locked";
 
+// 5 étapes réparties le long de la route : de la boutique jusqu'à l'atelier du parfumeur.
 const POSITIONS = [
-  { x: 164, y: 855, ring: "#a4b26a" },
-  { x: 536, y: 692, ring: "#a4b26a" },
-  { x: 665, y: 488, ring: "#a4b26a" },
-  { x: 942, y: 592, ring: "#9678b0" },
-  { x: 1185, y: 513, ring: "#c28921" },
-  { x: 930, y: 342, ring: "#0b1215" },
-  { x: 1140, y: 259, ring: "#0b1215" },
+  { x: 164, y: 855, ring: "#a4b26a" }, // 1. Votre projet — près de la boutique
+  { x: 665, y: 488, ring: "#a4b26a" }, // 2. Les contraintes — le verger
+  { x: 942, y: 592, ring: "#9678b0" }, // 3. Famille olfactive — les champs de fleurs
+  { x: 1185, y: 513, ring: "#c28921" }, // 4. Votre brief — la forêt
+  { x: 1140, y: 259, ring: "#0b1215" }, // 5. Vos échantillons — l'atelier du parfumeur
 ];
 const STEPS: Step[] = POSITIONS.map((p, i) => ({ ...p, n: i + 1, label: STEP_LABELS[i] }));
 
@@ -231,7 +230,7 @@ export default function JourneyMap({
         className="absolute inset-0 h-full w-full"
         style={{ overflow: "visible" }}
         role="img"
-        aria-label="Carte du voyage olfactif en sept étapes"
+        aria-label="Carte du voyage olfactif en cinq étapes"
       >
         <defs>
           <filter id="soft" filterUnits="userSpaceOnUse" x="-2000" y="-1500" width="5440" height="4000">
