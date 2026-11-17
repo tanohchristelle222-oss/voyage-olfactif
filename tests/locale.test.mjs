@@ -33,9 +33,10 @@ test('home content and FR/EN controls update without changing the number of proj
     const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
     vm.runInNewContext(code,{ exports, require(id) {
       if (id === 'react/jsx-runtime') return jsx;
+      if (id === 'react') return { useEffect() {}, useState: value => [value, () => {}] };
       if (id === 'next/link') return { default: 'a' };
       if (id === 'next/navigation') return { useRouter: () => ({ push: value => { destination=value; } }) };
-      if (id === 'motion/react') return { motion: new Proxy({}, { get: (_object,key) => key }) };
+      if (id === 'motion/react') return { useReducedMotion: () => true, motion: new Proxy({}, { get: (_object,key) => key }) };
       if (id === '@/components/JourneyMap') return { default: 'figure' };
       if (id === '@/lib/locale') return { useLocale: () => language, setLocale: value => { language=value; } };
       if (id === '@/lib/home-copy') return load('lib/home-copy.ts');
@@ -44,7 +45,7 @@ test('home content and FR/EN controls update without changing the number of proj
     } });
     modules[name] = exports; return exports;
   }
-  function nodes(element) { const result=[]; function walk(value) { if(Array.isArray(value)) return value.forEach(walk); if(value?.props){result.push(value);walk(value.props.children);} }walk(element);return result; }
+  function nodes(element) { const result=[]; function walk(value) { if(Array.isArray(value)) return value.forEach(walk); if(value?.props){ if(typeof value.type === 'function') return walk(value.type(value.props)); result.push(value);walk(value.props.children);} }walk(element);return result; }
   function texts(element) { return nodes(element).flatMap(node => Array.isArray(node.props.children) ? node.props.children.filter(child=>typeof child==='string') : typeof node.props.children==='string' ? [node.props.children] : []).join(' '); }
   const home = load('components/HomePage.tsx'), picker = load('components/LanguageSwitcher.tsx');
   assert.match(texts(home.default()),/5 étapes/);

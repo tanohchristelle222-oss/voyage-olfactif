@@ -10,6 +10,9 @@ export const TREE_SPOTS = [
   { x: 1170, y: 170, height: 60 }, { x: 1330, y: 470, height: 55 },
   { x: 1375, y: 420, height: 66 }, { x: 1365, y: 560, height: 52 },
   { x: 1390, y: 500, height: 61 }, { x: 1080, y: 190, height: 65 },
+  { x: 180, y: 945, height: 43 }, { x: 390, y: 850, height: 42 },
+  { x: 530, y: 950, height: 46 }, { x: 905, y: 950, height: 40 },
+  { x: 850, y: 170, height: 42 }, { x: 980, y: 180, height: 40 },
 ].map(spot => ({ ...spot, height: Math.round(spot.height * 1.4) * 1.25 }));
 
 export function createRoadsideTrees() {

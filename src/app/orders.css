@@ -45,11 +45,20 @@
 .order-history-tracking>summary:hover,.order-history-tracking[open]>summary{background:#1b2428;border-color:#1b2428;box-shadow:0 9px 18px #0b12152e}
 .order-history-tracking>summary:hover{transform:translateY(-1px)}
 .order-history-row.is-delivered .order-history-tracking>summary{background:#0b1215;color:white;border-color:#0b1215}
-.order-history-row.is-delivered .order-history-actions>button{background:#94205f;color:white;border-color:#94205f}
-.order-history-row.is-delivered .order-history-actions>button:hover{background:#7c194f}
+.order-history-actions>button{background:white;color:#0b1215;border-color:#dedede}
+.order-history-actions>button:hover{background:#f6f6f6;border-color:#bdbdbd}
 .order-history-tracking>div{width:100%;padding:15px;font-size:13px;overflow-wrap:anywhere}
 .order-history-tracking .tracking-timeline small{font-size:10px}
 .order-history-tracking .tracking-timeline li.reached>span{background:#94205f;border-color:#94205f}
 .orders-history-empty{grid-column:1/-1}
 @media(max-width:1100px){.orders-history-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.orders-history-page{padding:28px 18px 40px}.orders-history-list{grid-template-columns:1fr;gap:18px}.order-history-content{padding:20px}.order-history-visual{height:170px}.orders-history-page>h1{font-size:38px}.orders-history-intro{font-size:14px}.order-history-tracking>div{width:100%}}
+
+/* Retours visuels sur les actions de commande. */
+.order-history-actions>button,.order-history-tracking>summary{transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
+.order-history-actions>button>span,.order-history-tracking>summary>span{display:inline-block;transition:transform .18s}
+@media(hover:hover){.order-history-actions>button:hover{transform:translateY(-2px);box-shadow:0 6px 14px #0b12151a}.order-history-actions>button:hover>span{transform:translate(2px,-2px)}.order-history-tracking>summary:hover>span{transform:translateX(3px)}}
+.order-history-actions>button:active,.order-history-tracking>summary:active{transform:scale(.98);box-shadow:none}
+.order-history-actions>button:focus-visible,.order-history-tracking>summary:focus-visible{outline:2px solid #94205f;outline-offset:4px}
+.order-history-tracking[open]>summary>span{transform:rotate(90deg)}
+@media(prefers-reduced-motion:reduce){.order-history-actions>button,.order-history-tracking>summary,.order-history-actions>button>span,.order-history-tracking>summary>span{transition:none;transform:none}}

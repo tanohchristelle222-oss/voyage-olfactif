@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import JourneyMap from "@/components/JourneyMap";
 import { useLocale } from "@/lib/locale";
@@ -13,6 +14,29 @@ const fadeUp = (delay: number) => ({
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const },
 });
+
+function ProgressiveTitle({ text }: { text: string }) {
+  const [length, setLength] = useState(0);
+  const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    if (reducedMotion) return;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let current = 0;
+    const delay = setTimeout(() => {
+      interval = setInterval(() => {
+        current = Math.min(current + 1, text.length);
+        setLength(current);
+        if (current === text.length) clearInterval(interval);
+      }, 55);
+    }, 350);
+    return () => { clearTimeout(delay); clearInterval(interval); };
+  }, [text, reducedMotion]);
+  return <span className="relative block">
+    <span className="sr-only">{text}</span>
+    <span className="invisible" aria-hidden="true">{text}</span>
+    <span className="absolute inset-0" aria-hidden="true">{reducedMotion ? text : text.slice(0, length)}</span>
+  </span>;
+}
 
 
 
@@ -44,7 +68,7 @@ export default function HomePage() {
             {...fadeUp(0.25)}
             className="mt-4 font-display text-[clamp(2.4rem,4.6vw,3.8rem)] font-medium leading-[1.05]"
           >
-            {text.title}
+            <ProgressiveTitle key={text.title} text={text.title} />
           </motion.h1>
           <motion.p {...fadeUp(0.38)} className="mt-5 max-w-lg leading-relaxed text-navy/70">
             {text.intro(TOTAL_STEPS)}

@@ -1,14 +1,7 @@
 import * as THREE from 'three';
 import { fitDecor } from './decor-camera.mjs';
-export const DECOR_AREAS = [
-  { kind: 'village', x: 0, y: 495, width: 390, height: 240 },
-  { kind: 'tubes', x: 575, y: 600, width: 275, height: 305 },
-  { kind: 'projectVillage', x: 665, y: 235, width: 235, height: 170 },
-  { kind: 'vanilla', x: 1200, y: 570, width: 240, height: 160 },
-  { kind: 'forest', x: 1050, y: 735, width: 360, height: 185 },
-  { kind: 'coffret', x: 1225, y: 335, width: 210, height: 145 },
-  { kind: 'greenhouse', x: 855, y: 650, width: 180, height: 205 },
-];
+import { DECOR_AREAS } from './map-layout.mjs';
+export { DECOR_AREAS } from './map-layout.mjs';
 
 export { fitDecor } from './decor-camera.mjs';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -100,19 +93,29 @@ function forest() {
   }
   return group;
 }
+export function createDecor(kind, journey = {}, previewCoffret = false) {
+  const area = DECOR_AREAS.find(area => area.kind === kind);
+  if (!area) throw new Error('Unknown map decor: ' + kind);
+  let rig;
+  switch (kind) {
+    case 'village': {
+      const village = createVillage({ completed: [], unlocked: -1 });
+      rig = { root: village.root, update: time => updateVillage(village, time) }; break;
+    }
+    case 'tubes': rig = createTestTubes(); break;
+    case 'projectVillage': rig = createProjectVillage(); break;
+    case 'coffret': rig = createSampleCoffret(); break;
+    case 'greenhouse': rig = createInspirationGreenhouse(); break;
+    default: {
+      const root = kind === 'vanilla' ? vanilla() : forest();
+      rig = { root, update(time) { root.rotation.z = Math.sin(time * .65) * .012; } };
+    }
+  }
+  rig.setState?.(fragranceState(journey, previewCoffret), true);
+  return { ...area, ...rig };
+}
 export function createMapDecor(journey = {}, previewCoffret = false) {
-  const village = createVillage({ completed: [], unlocked: -1 });
-  const state = fragranceState(journey, previewCoffret);
-  const rigs = [
-    { ...DECOR_AREAS[0], root: village.root, update: time => updateVillage(village, time) },
-    { ...DECOR_AREAS[1], ...createTestTubes() },
-    { ...DECOR_AREAS[2], ...createProjectVillage() },
-    ...[vanilla(), forest()].map((root, i) => ({ ...DECOR_AREAS[i + 3], root, update(time) { root.rotation.z = Math.sin(time * .65) * .012; } })),
-    { ...DECOR_AREAS[5], ...createSampleCoffret() },
-    { ...DECOR_AREAS[6], ...createInspirationGreenhouse() },
-  ];
-  rigs.forEach(rig => rig.setState?.(state, true));
-  return rigs;
+  return DECOR_AREAS.map(area => createDecor(area.kind, journey, previewCoffret));
 }
 export function mountMapDecor(container, { onReady, onFallback, journey = {}, previewCoffret = false }) {
   let renderer;

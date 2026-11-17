@@ -1,9 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { createMapDecor, fitDecor, DECOR_AREAS } from '../src/components/village/map-decor.mjs';
+import { createMapDecor, createDecor, fitDecor, DECOR_AREAS } from '../src/components/village/map-decor.mjs';
+import { EXPLORABLE_DECORS } from '../src/components/village/map-layout.mjs';
 
 globalThis.document = { createElement: () => ({ getContext: () => null }) };
+
+test('every map illustration has a named explorer and an independently animated scene', () => {
+  assert.equal(EXPLORABLE_DECORS.length, DECOR_AREAS.length + 1);
+  for (const area of DECOR_AREAS) {
+    const target = EXPLORABLE_DECORS.find(target => target.kind === area.kind);
+    assert(target.label && target.x === area.x && target.width === area.width);
+    const scene = createDecor(area.kind, {}, true);
+    assert.equal(scene.kind, area.kind);
+    assert(scene.root.isObject3D);
+    scene.update(2); scene.update(8);
+    scene.root.traverse(object => assert(object.position.toArray().every(Number.isFinite)));
+  }
+  assert(EXPLORABLE_DECORS.some(target => target.kind === 'laboratory'));
+  assert.throws(() => createDecor('unknown'), /Unknown map decor/);
+});
 
 test('all roadside illustrations have real 3D geometry fitted inside their map area', () => {
   const items = createMapDecor();
